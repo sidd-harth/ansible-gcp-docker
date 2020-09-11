@@ -1,7 +1,12 @@
 ## ANSIBLE + Create and Destroy GCP Infrastructure  ++  Install Docker-CE
 
-### Repo is Capable o 
-- Provision and configure a VM instance, disk, VPC global network, subnetwork, firewall rules, and external IP address, using an Ansible Playbook containing an Ansible Role.
+- Provision and configure below resources using an Ansible Playbook containing an Ansible Role.
+  - GCE instance
+  - disk, 
+  - VPC global network, 
+  - subnetwork, 
+  - firewall rules, and 
+  - external IP address
 - Install Docker using an Ansible Playbook.
 - Test (pending)
 - Clean up all the GCP resources using an Ansible Playbook containing an Ansible Role.
