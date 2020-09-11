@@ -1,0 +1,58 @@
+---
+- name: delete an instance
+  gcp_compute_instance:
+    name: "{{ instance_name }}"
+    zone: "{{ zone }}"
+    project: "{{ gcp_project }}"
+    service_account_file: "{{service_account_file}}"
+    auth_kind: serviceaccount
+    state: absent
+
+- name: delete an address
+  gcp_compute_address:
+    name: "{{ instance_name }}"
+    region: "{{ region }}"
+    project: "{{ gcp_project }}"
+    state: absent
+    service_account_file: "{{service_account_file}}"
+    auth_kind: serviceaccount
+
+
+- name: delete a firewall
+  gcp_compute_firewall:
+    name: ansible-firewall
+    project: "{{ gcp_project }}"
+    service_account_file: "{{service_account_file}}"
+    auth_kind: serviceaccount
+    state: absent
+
+- name: register the existing network
+  gcp_compute_network:
+    name: ansible-network
+    project: "{{ gcp_project }}"
+    service_account_file: "{{service_account_file}}"
+    auth_kind: serviceaccount
+  register: network
+
+# - debug:
+#     var: network
+
+- name: delete a subnetwork
+  gcp_compute_subnetwork:
+    name: ansible-subnet
+    region: "{{ region }}"
+    network: "{{ network }}"
+    ip_cidr_range: "{{ ip_cidr_range }}"
+    project: "{{ gcp_project }}"
+    service_account_file: "{{service_account_file}}"
+    auth_kind: serviceaccount
+    state: absent
+
+- name: delete a network
+  gcp_compute_network:
+    name: ansible-network
+    project: "{{ gcp_project }}"
+    service_account_file: "{{service_account_file}}"
+    auth_kind: serviceaccount
+    state: absent
+

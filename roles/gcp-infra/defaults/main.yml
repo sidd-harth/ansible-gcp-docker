@@ -1,0 +1,10 @@
+---
+# defaults file for gcp-infra
+zone: us-east1-b
+region: us-east1
+machine_type: n1-standard-1
+size_gb: 100
+ip_cidr_range: 172.16.0.0/26
+instance_name: ansible-openshift
+service_account_file: /home/gcp/ansible-basics/service_account_gcp/sa.json
+gcp_project: istio-kubernetes-263915

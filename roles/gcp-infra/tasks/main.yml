@@ -1,0 +1,9 @@
+---
+- import_tasks: create_infra.yml
+  tags:
+    - create_infra
+
+- import_tasks: delete_infra.yml
+  tags:
+    - delete_infra
+

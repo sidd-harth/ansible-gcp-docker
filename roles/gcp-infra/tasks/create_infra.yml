@@ -1,0 +1,91 @@
+---
+- name: create a network
+  gcp_compute_network:
+    name: ansible-network
+    auto_create_subnetworks: yes
+    project: "{{ gcp_project }}"
+    state: present
+    auth_kind: serviceaccount
+    service_account_file: "{{ service_account_file }}"
+  register: network
+
+- name: create a subnetwork
+  gcp_compute_subnetwork:
+    name: ansible-subnet
+    region: "{{ region }}"
+    network: "{{ network }}"
+    ip_cidr_range: "{{ ip_cidr_range }}"
+    project: "{{ gcp_project }}"
+    state: present
+    auth_kind: serviceaccount
+    service_account_file: "{{service_account_file}}"
+  register: subnet
+- debug: var=network
+- debug: var=network.selfLink
+- name: create a firewall
+  gcp_compute_firewall:
+    name: ansible-firewall
+    network: 
+      selfLink: global/networks/{{ network.name }} 
+    allowed:
+    - ip_protocol: all
+    target_tags:
+    - openshift-istio
+    source_ranges: 
+    - 0.0.0.0/0
+    priority: 1000
+    direction: INGRESS
+    project: "{{ gcp_project }}" 
+    state: present
+    service_account_file: "{{service_account_file}}"
+    auth_kind: serviceaccount
+  register: firewall
+
+- name: create an address
+  gcp_compute_address:
+    name: "{{ instance_name }}"
+    region: "{{ region }}"
+    project: "{{ gcp_project }}"
+    state: present
+    service_account_file: "{{service_account_file}}"
+    auth_kind: serviceaccount
+  register: address
+
+- name: create a disk
+  gcp_compute_disk:
+    name: "{{ instance_name }}"
+    size_gb: "{{ size_gb }}"
+    source_image: 'projects/centos-cloud/global/images/centos-7-v20200910'
+    zone: "{{ zone }}"
+    project: "{{ gcp_project }}"
+    state: present
+    service_account_file: "{{service_account_file}}"
+    auth_kind: serviceaccount
+  register: disk
+
+- name: create an instance
+  gcp_compute_instance:
+    state: present
+    name: "{{ instance_name }}"
+    machine_type: "{{ machine_type }}"
+    disks:
+    - auto_delete: true
+      boot: true
+      source: "{{ disk }}"
+    network_interfaces:
+    - network: "{{ network }}"
+      subnetwork: "{{ subnet }}"
+      access_configs:
+      - name: External NAT
+        nat_ip: "{{ address }}"
+        type: ONE_TO_ONE_NAT
+    zone: "{{ zone }}"
+    service_account_file: "{{service_account_file}}"
+    auth_kind: serviceaccount
+    project: "{{ gcp_project }}"
+    tags:
+      items:
+        - openshift-istio
+  register: instance
+
+

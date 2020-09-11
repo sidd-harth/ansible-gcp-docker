@@ -1,0 +1,9 @@
+---
+- name: Create GCP webservers
+  hosts: localhost
+  gather_facts: no
+  connection: local
+
+  roles:
+    - role: gcp-infra
+

@@ -1,0 +1,73 @@
+---
+- hosts: ansible_gcp_servers 
+  become: yes
+  become_user: root
+  vars:
+    packages: [device-mapper-persistent-data, lvm2, yum-utils, wget, git, jq]
+    services: [daemon-reload, docker]
+  tasks:
+    ### Installing Docker
+    - yum: 
+       name: "{{ item }}" 
+       state: present
+      loop: "{{ packages }}"
+
+    - name: Add docker repository
+      shell: yum-config-manager --add-repo  https://download.docker.com/linux/centos/docker-ce.repo
+      args: 
+       creates: /etc/yum.repo.d/docker-ce.repo
+    
+    - yum: 
+       name:
+         - docker-ce
+         - docker-ce-cli 
+         - containerd.io 
+       state: present
+
+    - name: Start Docker Service
+      service: 
+       name: docker 
+       state: started 
+       enabled: yes
+
+    - name: adding Insecure registry entry
+      blockinfile:
+        create: yes
+        path: /etc/docker/daemon.json
+        block: |
+              {
+                 "insecure-registries": [
+                   "172.30.0.0/16"
+                 ]
+              }
+    - shell: "docker network inspect -f '{{ '{{' }}range .IPAM.Config {{ '}}' }}{{ '{{' }} .Subnet {{ '}}' }}{{ '{{' }}end{{ '}}' }}' bridge"
+      register: dockernetwork
+    - fail:
+       msg: Subset value is not equal to  172.17.0.0/16. Make changes
+      when: dockernetwork.stdout != "172.17.0.0/16"
+    - stat: path=/etc/firewalld/zones/dockerc.xml
+      register: dockerfirewalld
+  #  - debug: var=dockerfirewalld
+    - command: firewall-cmd --permanent --new-zone dockerc
+      when: dockerfirewalld.stat.exists|bool != true 
+    - firewalld:
+       zone: dockerc
+       permanent: true
+       source: 172.17.0.0/16
+       state: enabled
+    - firewalld:
+       zone: dockerc
+       permanent: true
+       port: 8443/tcp
+       state: enabled
+    - firewalld:
+       zone: dockerc
+       permanent: true
+       port: 53/udp
+       state: enabled
+    - firewalld:
+       zone: dockerc
+       permanent: true
+       port: 8053/udp  
+       state: enabled
+    - command: firewall-cmd --reload

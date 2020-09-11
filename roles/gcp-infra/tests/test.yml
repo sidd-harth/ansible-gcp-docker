@@ -1,0 +1,33 @@
+---
+---
+- name: Test basic values
+  hosts: ansibleservers
+  gather_facts: yes
+
+  tasks:
+
+  - name: Check if processor vCPUs count is 1
+    debug:
+      msg: Processor vCPUs count is 1
+    failed_when: ansible_facts['processor_vcpus'] != 1
+
+  - name: Check if distribution is CentOS
+    debug:
+      msg: Distribution is CentOS
+    failed_when: ansible_facts['distribution'] != 'CentOS'
+
+  - name: Check if distribution major version is 7
+    debug:
+      msg: Distribution major version is 7
+    failed_when: ansible_facts['distribution_major_version'] != '7'
+
+  - name: Check if hostname contains 'ansible-'
+    debug:
+      msg: Hostname contains 'ansible-'
+    failed_when: "'ansible-' not in ansible_facts['hostname']"
+
+
+#- hosts: localhost
+#  remote_user: root
+#  roles:
+#    - gcp-infra

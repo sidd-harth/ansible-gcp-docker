@@ -1,0 +1,14 @@
+plugin: gcp_compute
+projects:
+  - istio-kubernetes-263915
+auth_kind: serviceaccount
+service_account_file: /home/gcp/ansible-basics/service_account_gcp/sa.json
+scopes:
+ - https://www.googleapis.com/auth/compute
+#hostnames:
+# - name
+keyed_groups:
+  - key: zone
+groups:
+  ansible-gcp-servers: "'ansible-' in name"
+
