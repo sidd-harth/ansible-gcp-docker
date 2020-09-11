@@ -31,7 +31,7 @@ host_key_checking = False
 roles_path = roles
 #inventory = inventories/gcp-dynamic-inventory.gcp.yml
 remote_user = ansible
-private_key_file = ~/.ssh/id_rsa
+private_key_file = ~/.ssh/ansible
 
 [inventory]
 enable_plugins = gcp_compute
@@ -84,15 +84,16 @@ Tasks in Roles - `roles/gcp-infra/tasks/main.yml`
 #### Setup the GCP Resources 
 `ansible-playbook -i inventories/gcp-dynamic-inventory.gcp.yml playbooks/gcp_infra_setup.yml -t create_infra`
 
-#### Add Public SSH Key to newly create Compute Engine
+#### Add Public SSH Key to newly create Compute Engine either manually or automate it through `authorized_key` module
 `Copy the ~/.ssh/ansible.pub to the GCE SSH Keys`
-or
+
 `ansible -m authorized_key -a 'name=ansible key="...."' -i inventories/gcp-dynamic-inventory.gcp.yml ansible_gcp_servers`
 
 #### Install Docker by running
 `ansible-playbook playbooks/docker.yml -i inventories/gcp-dynamic-inventory.gcp.yml`
 
-#### Playbook to Test Docker Installation using Ansible - PENDING
+#### Playbook to Test Docker Installation using Ansible 
+`- PENDING`
 
 #### Destroy the GCE Resource 
 `ansible-playbook -i inventories/gcp-dynamic-inventory.gcp.yml playbooks/gcp_infra_setup.yml -t delete_infra`
